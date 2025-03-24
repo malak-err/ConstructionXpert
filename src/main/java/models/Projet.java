@@ -25,6 +25,9 @@ public class Projet {
         this.budjet = budjet;
     }
 
+    public Projet(int projetID) {
+    }
+
     public int getId() {
         return id;
     }

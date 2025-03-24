@@ -1,154 +1,147 @@
 package DAO;
 
 import models.Tache;
-
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TacheDao {
-
     private static Connection connection;
 
-    public TacheDao (){
+    public TacheDao() {
+        initializeConnection();
+    }
 
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            this.connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/constructionxpert", "root", "");
-
-            if (this.connection == null) {
-                throw new SQLException("Failed to establish database connection!");
+    private void initializeConnection() {
+        if (connection == null) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/constructionxpert", "root", "");
+                System.out.println("[TacheDao] Connexion à la base de données établie");
+            } catch (ClassNotFoundException e) {
+                System.err.println("[TacheDao] Pilote JDBC MySQL non trouvé : " + e.getMessage());
+                e.printStackTrace();
+            } catch (SQLException e) {
+                System.err.println("[TacheDao] Échec de la connexion : " + e.getMessage());
+                e.printStackTrace();
             }
-
-
-        } catch (ClassNotFoundException e) {
-            System.err.println("MySQL JDBC Driver not found!");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("Database connection error: " + e.getMessage());
-            e.printStackTrace();
         }
     }
+
     public void createtache(Tache tache) {
-        System.out.println("hello hhh");
+        System.out.println("[TacheDao] Création de la tâche : " + tache.getNom());
+        initializeConnection();
         if (connection == null) {
-            System.err.println("Database jjj connection is not initialized!");
+            System.err.println("[TacheDao] La connexion à la base de données n’est pas initialisée !");
             return;
         }
-
-        String query = "INSERT INTO tache (nom, startdate,enddate) VALUES ( ?, ?, ?)";
+        String query = "INSERT INTO tache (nom, startdate, enddate, projet_id) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-
             stmt.setString(1, tache.getNom());
-            stmt.setString(2,tache.getStartdate());
+            stmt.setString(2, tache.getStartdate());
             stmt.setString(3, tache.getEnddate());
-
-            stmt.executeUpdate();
-
+            stmt.setInt(4, tache.getProjetId());
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("[TacheDao] Tâche '" + tache.getNom() + "' insérée, lignes affectées : " + rowsAffected);
         } catch (SQLException e) {
-            System.err.println("Error inserting projet: " + e.getMessage());
+            System.err.println("[TacheDao] Erreur lors de l’insertion de la tâche : " + e.getMessage());
             e.printStackTrace();
         }
     }
-    public  List<Tache> getAlltaches() {
-        List<Tache> tacheList= new ArrayList<>();
+
+    public List<Tache> getAlltaches() {
+        List<Tache> tacheList = new ArrayList<>();
+        initializeConnection();
         if (connection == null) {
-            System.err.println("Database connection is not initialized!");
+            System.err.println("[TacheDao] La connexion à la base de données n’est pas initialisée !");
             return tacheList;
         }
-
         String query = "SELECT * FROM tache";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
-            System.out.println("hello");
             while (rs.next()) {
                 Tache tache = new Tache(
                         rs.getInt("id"),
                         rs.getString("nom"),
                         rs.getString("startdate"),
-                        rs.getString("enddate")
-
+                        rs.getString("enddate"),
+                        rs.getInt("projet_id")
                 );
                 tacheList.add(tache);
             }
+            System.out.println("[TacheDao] " + tacheList.size() + " tâches récupérées");
         } catch (SQLException e) {
-            System.err.println("Error fetching persons: " + e.getMessage());
+            System.err.println("[TacheDao] Erreur lors de la récupération des tâches : " + e.getMessage());
             e.printStackTrace();
         }
         return tacheList;
     }
 
-    public  void updatetache(Tache tache) {
+    public void updatetache(Tache tache) {
+        initializeConnection();
         if (connection == null) {
-            System.err.println("Database connection is not initialized!");
+            System.err.println("[TacheDao] La connexion à la base de données n’est pas initialisée !");
             return;
         }
-
-        String query = "UPDATE tache SET nom = ?,startdate = ?,enddate = ? WHERE id = ?";
+        String query = "UPDATE tache SET nom = ?, startdate = ?, enddate = ?, projet_id = ? WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            System.out.println("update");
             stmt.setString(1, tache.getNom());
-            stmt.setString(3, tache.getStartdate());
-            stmt.setString(4, tache.getEnddate());
-            stmt.setInt(6, tache.getId());
-
-            stmt.executeUpdate();
+            stmt.setString(2, tache.getStartdate());
+            stmt.setString(3, tache.getEnddate());
+            stmt.setInt(4, tache.getProjetId());
+            stmt.setInt(5, tache.getId());
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("[TacheDao] Tâche ID " + tache.getId() + " mise à jour, lignes affectées : " + rowsAffected);
         } catch (SQLException e) {
-            System.err.println("Error updating projet: " + e.getMessage());
+            System.err.println("[TacheDao] Erreur lors de la mise à jour de la tâche : " + e.getMessage());
             e.printStackTrace();
         }
-        System.out.println("hiiiiiii");
-
     }
 
-    public  void deletetache(int id) {
+    public void deletetache(int id) {
+        initializeConnection();
         if (connection == null) {
-            System.err.println("Database connection is not initialized!");
+            System.err.println("[TacheDao] La connexion à la base de données n’est pas initialisée !");
             return;
         }
-
         String query = "DELETE FROM tache WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
+            System.out.println("[TacheDao] Tâche ID " + id + " supprimée");
         } catch (SQLException e) {
-            System.err.println("Error deleting tache : " + e.getMessage());
+            System.err.println("[TacheDao] Erreur lors de la suppression de la tâche : " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-
     public Tache gettacheById(int id) {
+        initializeConnection();
         if (connection == null) {
-            System.err.println("Database connection is not initialized!");
+            System.err.println("[TacheDao] La connexion à la base de données n’est pas initialisée !");
             return null;
         }
-
-       Tache tache = null;
+        Tache tache = null;
         String query = "SELECT * FROM tache WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                  tache  = new Tache(
+                    tache = new Tache(
                             rs.getInt("id"),
                             rs.getString("nom"),
                             rs.getString("startdate"),
-                            rs.getString("enddate")
-
-
+                            rs.getString("enddate"),
+                            rs.getInt("projet_id")
                     );
                 }
             }
+            System.out.println("[TacheDao] Tâche ID " + id + " récupérée");
         } catch (SQLException e) {
-            System.err.println("Error fetching person by ID: " + e.getMessage());
+            System.err.println("[TacheDao] Erreur lors de la récupération de la tâche par ID : " + e.getMessage());
             e.printStackTrace();
         }
         return tache;
     }
-
-
-
 }

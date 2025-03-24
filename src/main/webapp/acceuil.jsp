@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -47,7 +48,7 @@
             left: -250px;
             width: 250px;
             height: 100%;
-            background-color: #001845;
+            background-color: #80b4dc;
             transition: left 0.3s ease;
             z-index: 1000;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
@@ -77,7 +78,7 @@
         }
 
         .sidebar ul li a:hover {
-            background-color: #80b4dc;
+            background-color: #33607e;
         }
 
         .content {
@@ -115,8 +116,8 @@
 <div class="sidebar" id="sidebar">
     <ul>
         <li><a href="acceuil.jsp">Accueil</a></li>
-        <li><a href="projet_liste.jsp">Projets</a></li>
-        <li><a href="taches_liste.jsp">Tâches</a></li>
+        <li><a href="/projet/liste">Projets</a></li>
+        <li><a href="/taches/listes">Tâches</a></li>
         <li><a href="ressources.html">Ressources</a></li>
         <li><a href="budget.html">contacter_nous</a></li>
         <li><a href="rapports.html">Rapports</a></li>

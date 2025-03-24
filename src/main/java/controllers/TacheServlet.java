@@ -29,7 +29,7 @@ public class TacheServlet extends HttpServlet {
         System.out.println("[TacheServlet] Action : " + action);
 
         switch (action) {
-            case "/new":
+            case "/taches/new":
                 createtache(req, resp);
                 break;
             case "/new-form":

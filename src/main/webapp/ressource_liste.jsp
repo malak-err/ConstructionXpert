@@ -97,45 +97,43 @@
     <a href="/acceuil.jsp"><i class="fas fa-home me-2"></i> Accueil</a>
     <a href="/projet/liste"><i class="fa-solid fa-table-list"></i> Projets</a>
     <a href="/taches/liste"><i class="fa-solid fa-table-list"></i> Tâches</a>
-    <a href="/ressource/liste"><i class="fa-solid fa-table-list"></i> Ressources</a>
+    <a href="ressource/liste"><i class="fa-solid fa-table-list"></i> Ressources</a>
     <a href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a>
   </div>
 </nav>
 <div class="container">
   <div id="projects" class="page">
     <div class="page-header">
-      <h1 class="page-title">Liste des Projets</h1>
-      <a href="/projet/new-form" class="add-button">+ Ajouter un projet</a>
+      <h1 class="page-title">Liste des ressources</h1>
+      <a href="/ressource/new-form" class="add-button">+ Ajouter un ressource</a>
     </div>
     <table class="table table-bordered">
       <thead>
       <tr>
         <th>ID</th>
         <th>Nom</th>
-        <th>Description</th>
-        <th>Date de début</th>
-        <th>Date de fin</th>
-        <th>Budget</th>
+        <th>type</th>
+        <th>quantité </th>
+        <th>fournisseur</th>
         <th>Actions</th>
       </tr>
       </thead>
       <tbody>
-      <c:forEach var="projet" items="${projets}">
+      <c:forEach var="ressource" items="${ressources}">
         <tr>
-          <td>${projet.id}</td>
-          <td>${projet.nom}</td>
-          <td>${projet.description}</td>
-          <td>${projet.startdate}</td>
-          <td>${projet.enddate}</td>
-          <td>${projet.budjet}</td>
+          <td>${ressource.id}</td>
+          <td>${ressource.nom}</td>
+          <td>${ressource.type}</td>
+          <td>${ressource.quantite}</td>
+          <td>${ressource.fournisseur}</td>
           <td>
             <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#editModal"
-                    data-id="${projet.id}" data-nom="${projet.nom}" data-description="${projet.description}"
-                    data-startdate="${projet.startdate}" data-enddate="${projet.enddate}" data-budjet="${projet.budjet}">
+                    data-id="${ressource.id}" data-nom="${ressource.nom}" data-type="${ressource.tupe}"
+                    data-quantite="${ressource.quantite}" data-fournisseur="${ressource.fournisseur}">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
                 
-            <a href="/projet/delete?id=${projet.id}"><i class="fa-solid fa-trash"></i></a>
+            <a href="/ressource/delete?id=${ressource.id}"><i class="fa-solid fa-trash"></i></a>
           </td>
         </tr>
       </c:forEach>
@@ -149,32 +147,29 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Modifier un Projet</h5>
+        <h5 class="modal-title" id="editModalLabel">Modifier un ressource</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="/projet/edit" method="POST">
+        <form action="/ressource/edit" method="POST">
           <input type="hidden" id="edit-id" name="id"> <!-- Champ caché pour l'id -->
           <div class="mb-3">
-            <label for="edit-nom" class="form-label">Nom du Projet</label>
+            <label for="edit-nom" class="form-label">Nom du ressource</label>
             <input type="text" class="form-control" id="edit-nom" name="nom" required>
           </div>
           <div class="mb-3">
-            <label for="edit-description" class="form-label">Description</label>
-            <textarea class="form-control" id="edit-description" name="description" rows="3" required></textarea>
+            <label for="edit-description" class="form-label">type</label>
+            <textarea class="form-control" id="edit-description" name="type" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label for="edit-startdate" class="form-label">Date de Début</label>
-            <input type="date" class="form-control" id="edit-startdate" name="startdate" required>
+            <label for="edit-startdate" class="form-label">quantité</label>
+            <input type="date" class="form-control" id="edit-startdate" name="quantite" required>
           </div>
           <div class="mb-3">
-            <label for="edit-enddate" class="form-label">Date de Fin</label>
-            <input type="date" class="form-control" id="edit-enddate" name="enddate" required>
+            <label for="edit-enddate" class="form-label">fournisseur</label>
+            <input type="date" class="form-control" id="edit-enddate" name="fournisseur" required>
           </div>
-          <div class="mb-3">
-            <label for="edit-budjet" class="form-label">Budget (€)</label>
-            <input type="number" class="form-control" id="edit-budjet" name="budjet" min="0" required>
-          </div>
+
           <button type="submit" class="btn btn-primary">Enregistrer</button>
         </form>
       </div>
@@ -184,25 +179,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Remplir la modale avec les données du projet au clic sur "Modifier"
   document.addEventListener('DOMContentLoaded', function () {
     var editModal = document.getElementById('editModal');
     editModal.addEventListener('show.bs.modal', function (event) {
       var button = event.relatedTarget; // Bouton qui a déclenché la modale
       var id = button.getAttribute('data-id');
       var nom = button.getAttribute('data-nom');
-      var description = button.getAttribute('data-description');
-      var startdate = button.getAttribute('data-startdate');
-      var enddate = button.getAttribute('data-enddate');
-      var budjet = button.getAttribute('data-budjet');
+      var type = button.getAttribute('data-type');
+      var quantite = button.getAttribute('data-quantite');
+      var fournisseur = button.getAttribute('data-fournisseur');
 
       // Remplir les champs de la modale
-      document.getElementById('edit-id').value = id; // Remplir le champ caché
+      document.getElementById('edit-id').value = id;
       document.getElementById('edit-nom').value = nom;
-      document.getElementById('edit-description').value = description;
-      document.getElementById('edit-startdate').value = startdate;
-      document.getElementById('edit-enddate').value = enddate;
-      document.getElementById('edit-budjet').value = budjet;
+      document.getElementById('edit-type').value = type;
+      document.getElementById('edit-quantite').value = quantite;
+      document.getElementById('edit-fournisseur').value = fournisseur;
     });
   });
 </script>

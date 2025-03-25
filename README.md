@@ -19,9 +19,9 @@ Frontend : HTML, CSS, JavaScript,Bootstrap
 Outils : Git (contrôle de version), Figma (maquettes)
 
 UML Diagrams
-1-Diagramme de classe :
-![img](Diagramme/class.png)
-2-Diagramme de séquence :
-![img](Diagramme/séquence.png)
-3-Diagramme de cas d'utilisation :
-![img](Diagramme/use_case.png)
+1-Diagramme de sequence :
+![img](./conseption/Blank-board.png)
+2-Diagramme de classe :
+![img](./conseption/Blank-diagram.png)
+3-Diagramme de cas d'utilisation:
+![img](./conseption/cas-d'utilisation.png)

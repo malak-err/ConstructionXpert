@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -95,9 +95,9 @@
 <nav>
     <div class="sidebar">
         <a href="/acceuil.jsp"><i class="fas fa-home me-2"></i> Accueil</a>
-        <a href="/projet/liste"><i class="fa-solid fa-table-list"></i> Projets</a>
-        <a href="/taches/liste"><i class="fa-solid fa-table-list"></i> Tâches</a>
-        <a href="#"><i class="fa-solid fa-table-list"></i> Ressources</a>
+        <a href="/projet_liste.jsp"><i class="fa-solid fa-table-list"></i> Projets</a>
+        <a href="/taches_liste.jsp"><i class="fa-solid fa-table-list"></i> Tâches</a>
+        <a href="/ressource/liste"><i class="fa-solid fa-table-list"></i> Ressources</a>
         <a href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a>
     </div>
 </nav>
@@ -114,32 +114,29 @@
                 <th>Nom</th>
                 <th>Date de début</th>
                 <th>Date de fin</th>
-                <th>Nom du Projet</th> <!-- Remplacement de "Projet ID" -->
+                <th>Ressources Associées</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <c:forEach var="tache" items="${taches}">
                 <tr>
-                    <td><c:out value="${tache.id}" /></td>
+                    <td><c:out value="${tache.idtache}" /></td>
                     <td><c:out value="${tache.nom}" /></td>
                     <td><c:out value="${tache.startdate}" /></td>
                     <td><c:out value="${tache.enddate}" /></td>
                     <td>
-                        <c:forEach var="projet" items="${projets}">
-                            <c:if test="${projet.id == tache.projetId}">
-                                <c:out value="${projet.nom}" />
-                            </c:if>
+                        <c:forEach var="ressource" items="${tacheRessources[tache.idtache]}">
+                            <c:out value="${ressource.nom} (${ressource.quantiteAssociee})" /><br/>
                         </c:forEach>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#editModal"
-                                data-id="${tache.id}" data-nom="${tache.nom}" data-startdate="${tache.startdate}"
-                                data-enddate="${tache.enddate}" data-projetid="${tache.projetId}">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-                            
-                        <a href="/taches/delete?id=<c:out value='${tache.id}' />"><i class="fa-solid fa-trash"></i></a>
+                        <a href="/taches/edit-form?id=<c:out value='${tache.idtache}' />"><i class="fa-solid fa-pen-to-square"></i></a>
+
+                        <a href="/taches/delete?id=<c:out value='${tache.idtache}' />"><i class="fa-solid fa-trash"></i></a>
+                        <c:if test="${not empty tache.idtache}">
+                            <a href="/taches/associer-ressource-form?id=<c:out value='${tache.idtache}' />"><i class="fa-solid fa-box"></i></a>
+                        </c:if>
                     </td>
                 </tr>
             </c:forEach>
@@ -148,63 +145,6 @@
     </div>
 </div>
 
-<!-- Modale pour modifier une tâche -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Modifier une Tâche</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="/taches/edit" method="POST">
-                    <input type="hidden" id="edit-id" name="id">
-                    <div class="mb-3">
-                        <label for="edit-nom" class="form-label">Nom de la Tâche</label>
-                        <input type="text" class="form-control" id="edit-nom" name="nom" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-startdate" class="form-label">Date de Début</label>
-                        <input type="date" class="form-control" id="edit-startdate" name="startdate" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-enddate" class="form-label">Date de Fin</label>
-                        <input type="date" class="form-control" id="edit-enddate" name="enddate" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-projetId" class="form-label">Projet Associé</label>
-                        <select class="form-control" id="edit-projetId" name="projetId" required>
-                            <c:forEach var="projet" items="${projets}">
-                                <option value="${projet.id}">${projet.nom}</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var editModal = document.getElementById('editModal');
-        editModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var nom = button.getAttribute('data-nom');
-            var startdate = button.getAttribute('data-startdate');
-            var enddate = button.getAttribute('data-enddate');
-            var projetId = button.getAttribute('data-projetid');
-
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-nom').value = nom;
-            document.getElementById('edit-startdate').value = startdate;
-            document.getElementById('edit-enddate').value = enddate;
-            document.getElementById('edit-projetId').value = projetId;
-        });
-    });
-</script>
 </body>
 </html>

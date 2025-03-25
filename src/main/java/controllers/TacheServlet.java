@@ -1,7 +1,7 @@
 package controllers;
 
 import DAO.TacheDao;
-import DAO.ProjetDao;
+import DAO.RessourceDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,15 +9,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.Tache;
-import models.Projet;
+import models.Ressource;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/taches/*")
 public class TacheServlet extends HttpServlet {
     TacheDao tacheDao = new TacheDao();
-    ProjetDao projetDao = new ProjetDao();
+    RessourceDao ressourceDao = new RessourceDao();
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);
@@ -29,7 +31,7 @@ public class TacheServlet extends HttpServlet {
         System.out.println("[TacheServlet] Action : " + action);
 
         switch (action) {
-            case "/taches/new":
+            case "/new":
                 createtache(req, resp);
                 break;
             case "/new-form":
@@ -47,6 +49,12 @@ public class TacheServlet extends HttpServlet {
             case "/liste":
                 listtache(req, resp);
                 break;
+            case "/associer-ressource-form":
+                associerRessourceForm(req, resp);
+                break;
+            case "/associer-ressource":
+                associerRessource(req, resp);
+                break;
             default:
                 resp.sendRedirect("/taches/liste");
         }
@@ -56,46 +64,41 @@ public class TacheServlet extends HttpServlet {
         String nom = req.getParameter("nom");
         String startdate = req.getParameter("startdate");
         String enddate = req.getParameter("enddate");
-        int projetId = Integer.parseInt(req.getParameter("projetId"));
-
-        Tache tache = new Tache(nom, startdate, enddate, projetId);
+        Tache tache = new Tache(nom, startdate, enddate);
         HttpSession session = req.getSession();
         try {
             tacheDao.createtache(tache);
             session.setAttribute("message", "Tâche ajoutée avec succès");
             session.setAttribute("messageType", "success");
-            System.out.println("[TacheServlet] Tâche créée : " + nom);
         } catch (Exception e) {
             session.setAttribute("error", e.getMessage());
             session.setAttribute("messageType", "danger");
-            System.err.println("[TacheServlet] Erreur lors de la création : " + e.getMessage());
         }
         resp.sendRedirect("/taches/liste");
     }
 
     private void addtacheForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Tache> taches = tacheDao.getAlltaches();
-        List<Projet> projets = projetDao.getAllprojets();
         req.setAttribute("taches", taches);
-        req.setAttribute("projets", projets);
         req.getRequestDispatcher("/taches_form.jsp").forward(req, resp);
     }
 
     private void listtache(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Tache> taches = tacheDao.getAlltaches();
-        List<Projet> projets = projetDao.getAllprojets(); // Récupérer tous les projets
+        Map<Integer, List<Ressource>> tacheRessources = new HashMap<>();
+        for (Tache tache : taches) {
+            List<Ressource> ressources = tacheDao.getRessourcesByTacheId(tache.getIdtache());
+            tacheRessources.put(tache.getIdtache(), ressources);
+        }
         req.setAttribute("taches", taches);
-        req.setAttribute("projets", projets); // Passer les projets à la JSP
-        System.out.println("[TacheServlet] Liste des tâches, taille : " + taches.size());
+        req.setAttribute("tacheRessources", tacheRessources);
         req.getRequestDispatcher("/taches_liste.jsp").forward(req, resp);
     }
 
     private void updatetacheForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String id = req.getParameter("id");
         Tache tache = tacheDao.gettacheById(Integer.parseInt(id));
-        List<Projet> projets = projetDao.getAllprojets();
         req.setAttribute("tache", tache);
-        req.setAttribute("projets", projets);
         req.getRequestDispatcher("/taches_form.jsp").forward(req, resp);
     }
 
@@ -104,23 +107,18 @@ public class TacheServlet extends HttpServlet {
         String nom = req.getParameter("nom");
         String startdate = req.getParameter("startdate");
         String enddate = req.getParameter("enddate");
-        int projetId = Integer.parseInt(req.getParameter("projetId"));
-
         HttpSession session = req.getSession();
         try {
             Tache tache = tacheDao.gettacheById(id);
             tache.setNom(nom);
             tache.setStartdate(startdate);
             tache.setEnddate(enddate);
-            tache.setProjetId(projetId);
             tacheDao.updatetache(tache);
             session.setAttribute("message", "Tâche modifiée avec succès");
             session.setAttribute("messageType", "success");
-            System.out.println("[TacheServlet] Tâche ID " + id + " mise à jour");
         } catch (Exception e) {
             session.setAttribute("error", e.getMessage());
             session.setAttribute("messageType", "danger");
-            System.err.println("[TacheServlet] Erreur lors de la mise à jour : " + e.getMessage());
         }
         resp.sendRedirect("/taches/liste");
     }
@@ -132,11 +130,46 @@ public class TacheServlet extends HttpServlet {
             tacheDao.deletetache(Integer.parseInt(id));
             session.setAttribute("message", "Tâche supprimée avec succès");
             session.setAttribute("messageType", "success");
-            System.out.println("[TacheServlet] Tâche ID " + id + " supprimée");
         } catch (Exception e) {
             session.setAttribute("error", e.getMessage());
             session.setAttribute("messageType", "danger");
-            System.err.println("[TacheServlet] Erreur lors de la suppression : " + e.getMessage());
+        }
+        resp.sendRedirect("/taches/liste");
+    }
+
+    protected void associerRessourceForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String idStr = request.getParameter("id");
+        if (idStr == null || idStr.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "L'ID de la tâche est requis pour associer des ressources.");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idStr);
+            // Votre logique existante pour récupérer les détails de la tâche et les ressources
+            // par exemple, request.setAttribute("tache", tacheService.findById(id));
+            request.getRequestDispatcher("/associer-ressource-form.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            request.setAttribute("errorMessage", "Format de l'ID de la tâche invalide.");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+        }
+    }
+
+
+
+    private void associerRessource(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int idtache = Integer.parseInt(req.getParameter("idtache"));
+        int idressource = Integer.parseInt(req.getParameter("idressource"));
+        int quantite = Integer.parseInt(req.getParameter("quantite"));
+        HttpSession session = req.getSession();
+        try {
+            tacheDao.associerRessource(idtache, idressource, quantite);
+            session.setAttribute("message", "Ressource associée avec succès");
+            session.setAttribute("messageType", "success");
+        } catch (Exception e) {
+            session.setAttribute("error", e.getMessage());
+            session.setAttribute("messageType", "danger");
         }
         resp.sendRedirect("/taches/liste");
     }

@@ -1,6 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <html>
 <head>
     <title>Formulaire Tâche</title>
@@ -30,7 +29,7 @@
                         </h2>
                     </caption>
                     <c:if test="${tache != null}">
-                        <input type="hidden" name="id" value="${tache.id}" />
+                        <input type="hidden" name="idtache" value="${tache.id}" />
                     </c:if>
                     <fieldset class="form-group">
                         <label>Nom</label>

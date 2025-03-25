@@ -26,7 +26,7 @@ public class RessourceServlet extends HttpServlet {
         System.out.println("[RessourceServlet] Action : " + action);
 
         switch (action) {
-            case "/ressource/new":
+            case "/new":
                 createressource(req, resp);
                 break;
             case "/new-form":

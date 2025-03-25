@@ -128,7 +128,7 @@
           <td>${ressource.fournisseur}</td>
           <td>
             <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#editModal"
-                    data-id="${ressource.id}" data-nom="${ressource.nom}" data-type="${ressource.tupe}"
+                    data-id="${ressource.id}" data-nom="${ressource.nom}" data-type="${ressource.type}"
                     data-quantite="${ressource.quantite}" data-fournisseur="${ressource.fournisseur}">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
@@ -158,16 +158,16 @@
             <input type="text" class="form-control" id="edit-nom" name="nom" required>
           </div>
           <div class="mb-3">
-            <label for="edit-description" class="form-label">type</label>
-            <textarea class="form-control" id="edit-description" name="type" rows="3" required></textarea>
+            <label for="edit-type" class="form-label">type</label>
+            <textarea class="form-control" id="edit-type" name="type" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label for="edit-startdate" class="form-label">quantité</label>
-            <input type="date" class="form-control" id="edit-startdate" name="quantite" required>
+            <label for="edit-quantite" class="form-label">quantité</label>
+            <input type="date" class="form-control" id="edit-quantite" name="quantite" required>
           </div>
           <div class="mb-3">
-            <label for="edit-enddate" class="form-label">fournisseur</label>
-            <input type="date" class="form-control" id="edit-enddate" name="fournisseur" required>
+            <label for="edit-fournisseur" class="form-label">fournisseur</label>
+            <input type="date" class="form-control" id="edit-fournisseur" name="fournisseur" required>
           </div>
 
           <button type="submit" class="btn btn-primary">Enregistrer</button>

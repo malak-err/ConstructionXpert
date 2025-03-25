@@ -1,33 +1,48 @@
 package models;
 
 public class Tache {
-    private int id;
+    private int idtache;
     private String nom;
     private String startdate;
     private String enddate;
-    private int projetId; // Nouveau champ pour lier au projet
+    private int projetId;
 
     public Tache(String nom, String startdate, String enddate, int projetId) {
         this.nom = nom;
         this.startdate = startdate;
         this.enddate = enddate;
+
+
         this.projetId = projetId;
     }
 
-    public Tache(int id, String nom, String startdate, String enddate, int projetId) {
-        this.id = id;
+    public Tache(int idtache, String nom, String startdate, String enddate, int projetId) {
+        this.idtache = idtache;
         this.nom = nom;
         this.startdate = startdate;
         this.enddate = enddate;
         this.projetId = projetId;
     }
 
-    public int getId() {
-        return id;
+    public Tache(int idtache, String nom, String startdate, String enddate) {
+        this.idtache = idtache;
+        this.nom = nom;
+        this.startdate = startdate;
+        this.enddate = enddate;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public Tache(String nom, String startdate, String enddate) {
+        this.nom = nom;
+        this.startdate = startdate;
+        this.enddate = enddate;
+    }
+
+    public int getIdtache() {
+        return idtache;
+    }
+
+    public void setIdtache(int idtache) {
+        this.idtache = idtache;
     }
 
     public String getNom() {

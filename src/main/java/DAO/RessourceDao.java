@@ -26,51 +26,55 @@ public class RessourceDao {
             System.err.println("[ProjetDao] Échec de la connexion à la base de données : " + e.getMessage());
             e.printStackTrace();
         }
+
     }
+
     public void createressource(Ressource ressource) {
         if (connection == null) {
+            System.err.println("[RessourceDao] La connexion à la base de données n’est pas initialisée !");
             return;
         }
-        String query = "INSERT INTO projet (nom, type, quantite, fournisseur) VALUES (?, ?, ?, ?";
+        String query = "INSERT INTO ressource (nom, type, quantite, fournisseur) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, ressource.getNom());
             stmt.setString(2, ressource.getType());
             stmt.setInt(3, ressource.getQuantite());
             stmt.setString(4, ressource.getFournisseur());
             int rowsAffected = stmt.executeUpdate();
-            System.out.println("[ProjetDao] Projet '" + ressource.getNom() + "' inséré, lignes affectées : " + rowsAffected);
+            System.out.println("[RessourceDao] Ressource '" + ressource.getNom() + "' insérée, lignes affectées : " + rowsAffected);
         } catch (SQLException e) {
-            System.err.println("[ProjetDao] Erreur lors de l’insertion du projet : " + e.getMessage());
+            System.err.println("[RessourceDao] Erreur lors de l’insertion de la ressource : " + e.getMessage());
             e.printStackTrace();
-        }}
-
-
-        public List<Ressource> getAllressources() {
-            List<Ressource> ressourceList = new ArrayList<>();
-            if (connection == null) {
-                System.err.println("[ProjetDao] La connexion à la base de données n’est pas initialisée !");
-            }
-            String query = "SELECT * FROM ressource";
-            try (Statement stmt = connection.createStatement();
-                 ResultSet rs = stmt.executeQuery(query)) {
-                while (rs.next()) {
-                   Ressource ressource = new Ressource(
-                            rs.getInt("id"),
-                            rs.getString("nom"),
-                            rs.getString("type"),
-                            rs.getInt("quantite"),
-                           rs.getString("fournisseur")
-
-                           );
-                    ressourceList.add(ressource);
-                }
-                System.out.println("[ProjetDao] " + ressourceList.size() + " projets récupérés");
-            } catch (SQLException e) {
-                System.err.println("[ProjetDao] Erreur lors de la récupération des projets : " + e.getMessage());
-                e.printStackTrace();
-            }
-            return ressourceList;
         }
+    }
+
+
+    public List<Ressource> getAllressources() {
+        List<Ressource> ressourceList = new ArrayList<>();
+        if (connection == null) {
+            System.err.println("[ProjetDao] La connexion à la base de données n’est pas initialisée !");
+        }
+        String query = "SELECT * FROM ressource";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                Ressource ressource = new Ressource(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("type"),
+                        rs.getInt("quantite"),
+                        rs.getString("fournisseur")
+
+                );
+                ressourceList.add(ressource);
+            }
+            System.out.println("[ProjetDao] " + ressourceList.size() + " projets récupérés");
+        } catch (SQLException e) {
+            System.err.println("[ProjetDao] Erreur lors de la récupération des projets : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ressourceList;
+    }
 
     public void updateressource(Ressource ressource) {
         if (connection == null) {
@@ -91,6 +95,7 @@ public class RessourceDao {
             e.printStackTrace();
         }
     }
+
     public void deleteressource(int id) {
         if (connection == null) {
             System.err.println("[ProjetDao] La connexion à la base de données n’est pas initialisée !");
@@ -106,6 +111,7 @@ public class RessourceDao {
             e.printStackTrace();
         }
     }
+
     public Ressource getressourceById(int id) {
         if (connection == null) {
             return null;
@@ -125,28 +131,37 @@ public class RessourceDao {
                     );
                 }
             }
-            System.out.println("[ProjetDao] Projet ID " + id + " récupéré");
+            System.out.println("[RessourceDao] Projet ID " + id + " récupéré");
         } catch (SQLException e) {
-            System.err.println("[ProjetDao] Erreur lors de la récupération du projet par ID : " + e.getMessage());
+            System.err.println("[RessourceDao] Erreur lors de la récupération du projet par ID : " + e.getMessage());
             e.printStackTrace();
         }
         return ressource;
     }
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Nouvelle méthode pour assigner une ressource à une tâche
+    public void assignerRessource(int idtache, int id, int quantite) throws SQLException {
+        connection.setAutoCommit(false); // Début de la transaction
+            // Vérifier la quantité disponible
+            String checkQuery = "SELECT quantite FROM ressource WHERE id = ?";
+            try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
+                checkStmt.setInt(1, id);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next()) {
+                    int quantiteDisponible = rs.getInt("quantite");
+                    if (quantiteDisponible < quantite) {
+                        throw new SQLException("Quantité insuffisante pour la ressource ID " + id);
+                    }
+                } else {
+                    throw new SQLException("Ressource ID " + id + " non trouvée");
+                }}
+        // Insérer dans tache_ressource
+        String insertQuery = "INSERT INTO tache_ressource (idtache, id, quantite) VALUES (?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE quantite = quantite + VALUES(quantite)";
+        try (PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
+            insertStmt.setInt(1, idtache);
+            insertStmt.setInt(2, id);
+            insertStmt.setInt(3, quantite);
+            insertStmt.executeUpdate();
+        }
+    }}

@@ -25,7 +25,7 @@ public class ProjetServlet extends HttpServlet {
         System.out.println("[ProjetServlet] Action : " + action);
 
         switch (action) {
-            case "/projet/new":
+            case "/new":
                 createprojet(req, resp);
                 break;
             case "/new-form":

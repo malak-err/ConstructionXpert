@@ -29,7 +29,7 @@
                         </h2>
                     </caption>
                     <c:if test="${tache != null}">
-                        <input type="hidden" name="idtache" value="${tache.id}" />
+                        <input type="hidden" name="idtache" value="${tache.idtache}" />
                     </c:if>
                     <fieldset class="form-group">
                         <label>Nom</label>

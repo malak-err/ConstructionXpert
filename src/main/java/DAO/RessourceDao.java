@@ -137,31 +137,5 @@ public class RessourceDao {
             e.printStackTrace();
         }
         return ressource;
-    }
-
-    // Nouvelle méthode pour assigner une ressource à une tâche
-    public void assignerRessource(int idtache, int id, int quantite) throws SQLException {
-        connection.setAutoCommit(false); // Début de la transaction
-            // Vérifier la quantité disponible
-            String checkQuery = "SELECT quantite FROM ressource WHERE id = ?";
-            try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
-                checkStmt.setInt(1, id);
-                ResultSet rs = checkStmt.executeQuery();
-                if (rs.next()) {
-                    int quantiteDisponible = rs.getInt("quantite");
-                    if (quantiteDisponible < quantite) {
-                        throw new SQLException("Quantité insuffisante pour la ressource ID " + id);
-                    }
-                } else {
-                    throw new SQLException("Ressource ID " + id + " non trouvée");
-                }}
-        // Insérer dans tache_ressource
-        String insertQuery = "INSERT INTO tache_ressource (idtache, id, quantite) VALUES (?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE quantite = quantite + VALUES(quantite)";
-        try (PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
-            insertStmt.setInt(1, idtache);
-            insertStmt.setInt(2, id);
-            insertStmt.setInt(3, quantite);
-            insertStmt.executeUpdate();
-        }
     }}
+
